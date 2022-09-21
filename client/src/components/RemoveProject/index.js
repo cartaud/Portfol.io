@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { useMutation } from '@apollo/client';
 import { EDIT_PORTFOLIO } from "../../utils/mutations";
 
-function AddProject(params) {
+
+function RemoveProject(params) {
     const styles = {
         container: {
             marginTop: '5%',
@@ -35,7 +36,6 @@ function AddProject(params) {
             marginLeft: '5%',
             marginRight: '5%',
             display: 'flex',
-            flexDirection: 'column'
         },
         inputHeadings: {
             fontWeight: 'bold',
@@ -45,12 +45,24 @@ function AddProject(params) {
         btnShadow: {
             boxShadow: '0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19)',
             width: '100%'
-          },
+        },
+        deleteBtn: {
+            border: 'none',
+            textAlign: 'center',
+            color: 'white',
+            backgroundColor: 'red',
+            borderRadius: '100%',
+            height: 'fit-content',
+            width: '8%',
+            marginLeft: '5px',
+            fontSize: '20px'
+        }
     }
 
     const portfolio = params.userData.portfolio[0]
+    console.log()
 
-    const [formState, setFormState] = useState( { projectName: '', projectUrl: '', projectPreview: ''} );
+    const [formState, setFormState] = useState([]);
     const [saveProject] = useMutation(EDIT_PORTFOLIO);
     const payload = 
         { 
@@ -65,16 +77,19 @@ function AddProject(params) {
         }
     const handleFormSubmit = async (event) => {
         event.preventDefault();
-        const removeType = []
+        const keepProject = []
         payload.projects.forEach(project => {
-            removeType.push({
-                projectName: project.projectName, 
-                projectUrl: project.projectUrl, 
-                projectPreview: project.projectPreview
-            })
+            if (formState.indexOf(project.projectName) < 0) {
+                keepProject.push({
+                    projectName: project.projectName, 
+                    projectUrl: project.projectUrl, 
+                    projectPreview: project.projectPreview
+                })
+            }
         });
-        const arr = [...removeType, formState]
+        const arr = [...keepProject]
         payload.projects = arr
+        console.log(payload.projects)
         saveProject({
         variables: { input: { ...payload } },
         });        
@@ -82,55 +97,40 @@ function AddProject(params) {
     };
 
     const handleChange = (event) => {
-        const { name, value } = event.target;
-        setFormState({
-        ...formState,
-        [name]: value,
-        });
+        const projectName = event.target.name
+         if (event.target.checked) {
+            setFormState([
+                ...formState,
+                projectName
+            ]);
+         } else {
+            const arr = [...formState]
+            arr.splice(arr.indexOf(projectName),1)
+            setFormState([
+                ...arr
+            ]);
+         }
     };
 
     return (
         <div style={styles.container}>
             <div style={styles.headerContainer}>
-                <h2 style={styles.title}>ADD PROJECT</h2>
+                <h2 style={styles.title}>DELETE PROJECT</h2>
                 <button  id="cancel" style={styles.btn}>Cancel</button>
             </div> 
             <form onSubmit={handleFormSubmit} style={styles.form}>
-                <div style={styles.inputContainer}>
-                    <label htmlFor="projectName" style={styles.inputHeadings}>Project Name:</label>
-                    <input
-                        style={styles.btnShadow}
-                        name="projectName"
-                        type="text"
-                        id="projectName"
-                        onChange={handleChange}
-                    />
+            {portfolio.projects.map((project) => (
+                <div style={styles.inputContainer} key={project.projectName}>
+                    <h2 htmlFor="projectName" style={styles.inputHeadings}>{project.projectName}:</h2>
+                    <input type="checkbox" name={project.projectName}  onChange={handleChange} />
                 </div>
-                <div style={styles.inputContainer}>
-                    <label htmlFor="projectUrl" style={styles.inputHeadings}>Project URL:</label>
-                    <input
-                        style={styles.btnShadow}
-                        name="projectUrl"
-                        type="text"
-                        id="projectUrl"
-                        onChange={handleChange}
-                    />
-                </div>
-                <div style={styles.inputContainer}>
-                    <label htmlFor="projectPreview" style={styles.inputHeadings}>Project Preview:</label>
-                    <input
-                        style={styles.btnShadow}
-                        name="projectPreview"
-                        id="projectPreview"
-                        onChange={handleChange}
-                    />
-                </div>
+            ))}
                 <div className="flex-row flex-end">
-                    <button type="submit" style={styles.btn}>Add project +</button>
+                    <button style={styles.btn}>Remove projects</button>
                 </div>
             </form>
         </div>
     )
 }
 
-export default AddProject
+export default RemoveProject

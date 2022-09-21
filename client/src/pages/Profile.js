@@ -5,11 +5,10 @@ import StyleTwo from "../components/StyleTwo";
 import StyleThree from "../components/StyleThree";
 import EditPortfolio from "../components/EditPortfolio";
 import AddProject from "../components/AddProject";
+import RemoveProject from "../components/RemoveProject";
 import { Link } from "react-router-dom";
 
 import { QUERY_ME } from '../utils/queries';
-//Questions:
-//need help debugging why QUERY_ME is returning no data
 
 const Profile = () => {
   const styles = {
@@ -42,14 +41,14 @@ const Profile = () => {
     const profile = data?.me || {};
     const [portfolioBody, setPortfolioBody] = useState('none');
     const [editContent, setEditContent] = useState(<button id="edit" style={styles.btn} >Edit Portfolio</button>)
-    const [ProjContent, setProjContent] = useState(<button style={styles.btn} id="project">Add Project+</button>)
+    const [addProjContent, setAddProjContent] = useState(<button style={styles.btn} id="project">Add Project+</button>)
     const [shareBtn, setShareBtn] = useState(<button id="share" style={styles.btn}>Share Portfolio</button>)
+    const [removeProjContent, setRemoveProj] = useState(<button style={styles.btn} id="remove">Delete Project-</button>)
 
     const [btnContainer, setBtnContainer] = useState({
         width: '10%',
         top: '45px'
     })
-    const path = window.location.href
 
     const copyUrl = () => {
       const shareUrl = window.location.href + '/' + profile._id
@@ -93,23 +92,34 @@ const Profile = () => {
       copyUrl();
       setShareBtn(<button id="share" style={styles.btn} >Copied to Clipboard</button>)
     } else if (e.target.id === "edit") {
-      setEditContent(<EditPortfolio userData={profile} btns={btnClick}/>)
+      setEditContent(<EditPortfolio userData={profile} />)
       setBtnContainer({
         width: '50%'
       })
       setShareBtn('')
-      setProjContent('')
+      setAddProjContent('')
+      setRemoveProj('')
     } else if (e.target.id === "project") {
-      setProjContent(<AddProject userData={profile} btns={btnClick}/>)
+      setAddProjContent(<AddProject userData={profile} />)
       setBtnContainer({
-        width: '25%'
+        width: '35%'
       })
       setShareBtn('')
       setEditContent('')
+      setRemoveProj('')
+    } else if (e.target.id === "remove") {
+      setShareBtn('')
+      setEditContent('')
+      setAddProjContent('')
+      setRemoveProj(<RemoveProject userData={profile} />)
+      setBtnContainer({
+        width: '30%'
+      })
     } else if (e.target.id === "cancel") {
       setShareBtn(<button id="share" style={styles.btn}>Share Portfolio</button>)
       setEditContent(<button id="edit" style={styles.btn} >Edit Portfolio</button>)
-      setProjContent(<button style={styles.btn} id="project">Add Project+</button>)
+      setAddProjContent(<button style={styles.btn} id="project">Add Project+</button>)
+      setRemoveProj(<button style={styles.btn} id="remove">Delete Project-</button>)
       setBtnContainer({
         width: '10%'
       })
@@ -122,7 +132,8 @@ const Profile = () => {
       <div style={btnContainer} onClick={btnClick}>
         <div>{shareBtn}</div>
         <div>{editContent}</div>
-        <div>{ProjContent}</div>
+        <div>{addProjContent}</div>
+        <div>{removeProjContent}</div>
       </div>
       <div style={styles.body}>
         {portfolioBody}
